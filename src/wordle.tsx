@@ -7,6 +7,8 @@ for (let i = 0; i < wordCount; i++) {
     wordList.push(inputs[i]);
 }
 
+sortByUniqueCharacters(wordList);
+
 const untriedLettersList: string[] = wordList.slice();
 
 // Keep track of when we've filtered by correct
@@ -68,7 +70,7 @@ while (true) {
     //guess = wordList[num];
 
     if (wordList.length > 1 && inputs.includes("1") && untriedLettersList.length > 0) {
-        sortByUniqueCharacters(untriedLettersList);
+        //sortByUniqueCharacters(untriedLettersList);
         guess = untriedLettersList[0];
     } else {
         // sortByUniqueCharacters(wordList);
@@ -136,3 +138,4 @@ function countUniqueCharacters(word: string): number {
     const uniqueChars = new Set(word);
     return uniqueChars.size;
 }
+
