@@ -1,3 +1,4 @@
+// https://www.codingame.com/ide/puzzle/wordle
 const wordCount: number = parseInt(readline()); // Number of words in the word set
 
 let wordList: string[] = [];
