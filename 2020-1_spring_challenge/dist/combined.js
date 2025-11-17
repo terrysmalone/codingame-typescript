@@ -1,14 +1,44 @@
+var FloorType;
+(function (FloorType) {
+    FloorType[FloorType["Unknown"] = 0] = "Unknown";
+    FloorType[FloorType["Empty"] = 1] = "Empty";
+    FloorType[FloorType["SmallPellet"] = 2] = "SmallPellet";
+    FloorType[FloorType["LargePellet"] = 3] = "LargePellet";
+    FloorType[FloorType["Wall"] = 4] = "Wall";
+})(FloorType || (FloorType = {}));
+
 function logComment(comment) {
     console.error(`Comment: ${comment}`);
 }
 function logPacs(pacs) {
     for (const pac of pacs) {
         console.error(`Pac: ${pac.id}`);
-        console.error(`Pos: ${pac.xPos}, ${pac.yPos}`);
+        console.error(`Pos: (${pac.xPos}, ${pac.yPos})`);
         console.error(`Type: ${pac.pacType}`);
         console.error(`Speed turns left: ${pac.speedTurnsLeft}`);
-        console.error(`Ability cooldown: ${pac.abilityCooldown}`);
+        console.error(`Ability cooldown: (${pac.abilityCooldown})`);
         console.error();
+    }
+}
+function logFloor(floorMap) {
+    const wall = "\u2B1C";
+    const unknown = "❓\uFE0F";
+    console.error("Walls");
+    for (let y = 0; y < floorMap.length; y++) {
+        var row = "";
+        for (let x = 0; x < floorMap[y].length; x++) {
+            var tile = unknown;
+            switch (floorMap[y][x]) {
+                case FloorType.Wall:
+                    tile = wall;
+                    break;
+                case FloorType.Unknown:
+                    tile = unknown;
+                    break;
+            }
+            row += tile;
+        }
+        console.error(row);
     }
 }
 
@@ -18,9 +48,27 @@ function logPacs(pacs) {
 var inputs = readline().split(' ');
 parseInt(inputs[0]); // size of the grid
 const height = parseInt(inputs[1]); // top left corner is (x=0, y=0)
-for (let i = 0; i < height; i++) {
-    readline(); // one line of the grid: space " " is floor, pound "#" is wall
+// Even though we add walls to the floor map, track them here too
+// for faster lookup
+var wallMap = [];
+var floorMap = [];
+for (let y = 0; y < height; y++) {
+    wallMap[y] = [];
+    floorMap[y] = [];
+    const row = readline(); // one line of the grid: space " " is floor, pound "#" is wall
+    const tiles = row.split("");
+    for (let x = 0; x < tiles.length; x++) {
+        if (tiles[x] == " ") {
+            wallMap[y][x] = false;
+            floorMap[y][x] = FloorType.Unknown;
+        }
+        else {
+            wallMap[y][x] = true;
+            floorMap[y][x] = FloorType.Wall;
+        }
+    }
 }
+logFloor(floorMap);
 // game loop
 while (true) {
     var pacs = [];
