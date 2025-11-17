@@ -36,6 +36,15 @@ export function logFloor(floorMap: FloorType[][]): void {
                 case FloorType.Unknown:
                     tile = unknown;
                     break;
+                case FloorType.SmallPellet:
+                    tile = smallPellet;
+                    break;
+                case FloorType.LargePellet:
+                    tile = largePellet;
+                    break;
+                case FloorType.Empty:
+                    tile = empty;
+                    break;
             }
 
             row += tile;

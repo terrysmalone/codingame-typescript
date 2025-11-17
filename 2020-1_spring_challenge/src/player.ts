@@ -33,8 +33,6 @@ for (let y = 0; y < height; y++) {
     }
 }
 
-logFloor(floorMap);
-
 // game loop
 while (true) {
     var pacs: Pac[] = [];
@@ -64,6 +62,10 @@ while (true) {
                 abilityCooldown: abilityCooldown,
             })
         }
+
+        // TODO: If it's a pac that's not mine log it's position
+
+        floorMap[y][x] = FloorType.Empty;
     }
     const visiblePelletCount: number = parseInt(readline()); // all pellets in sight
     for (let i = 0; i < visiblePelletCount; i++) {
@@ -71,8 +73,19 @@ while (true) {
         const x: number = parseInt(inputs[0]);
         const y: number = parseInt(inputs[1]);
         const value: number = parseInt(inputs[2]); // amount of points this pellet is worth
+
+        // Update map
+        if (value == 1) {
+            floorMap[y][x] = FloorType.SmallPellet;
+        } else {
+            floorMap[y][x] = FloorType.LargePellet;
+        }
+
+        // TODO: extrapolate empty squares at some point by working out everywhere
+        // each pac can see and subtracting the above
     }
 
+    logFloor(floorMap);
     logPacs(pacs);
 
     // Write an action using console.log()

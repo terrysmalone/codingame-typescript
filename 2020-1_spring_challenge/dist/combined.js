@@ -22,7 +22,10 @@ function logPacs(pacs) {
 }
 function logFloor(floorMap) {
     const wall = "\u2B1C";
+    const empty = "\u2B1B";
     const unknown = "❓\uFE0F";
+    const smallPellet = "\u25FD\uFE0F";
+    const largePellet = "\u26AA";
     console.error("Walls");
     for (let y = 0; y < floorMap.length; y++) {
         var row = "";
@@ -34,6 +37,15 @@ function logFloor(floorMap) {
                     break;
                 case FloorType.Unknown:
                     tile = unknown;
+                    break;
+                case FloorType.SmallPellet:
+                    tile = smallPellet;
+                    break;
+                case FloorType.LargePellet:
+                    tile = largePellet;
+                    break;
+                case FloorType.Empty:
+                    tile = empty;
                     break;
             }
             row += tile;
@@ -68,7 +80,6 @@ for (let y = 0; y < height; y++) {
         }
     }
 }
-logFloor(floorMap);
 // game loop
 while (true) {
     var pacs = [];
@@ -95,14 +106,26 @@ while (true) {
                 abilityCooldown: abilityCooldown,
             });
         }
+        // TODO: If it's a pac that's not mine log it's position
+        floorMap[y][x] = FloorType.Empty;
     }
     const visiblePelletCount = parseInt(readline()); // all pellets in sight
     for (let i = 0; i < visiblePelletCount; i++) {
         var inputs = readline().split(' ');
-        parseInt(inputs[0]);
-        parseInt(inputs[1]);
-        parseInt(inputs[2]); // amount of points this pellet is worth
+        const x = parseInt(inputs[0]);
+        const y = parseInt(inputs[1]);
+        const value = parseInt(inputs[2]); // amount of points this pellet is worth
+        // Update map
+        if (value == 1) {
+            floorMap[y][x] = FloorType.SmallPellet;
+        }
+        else {
+            floorMap[y][x] = FloorType.LargePellet;
+        }
+        // TODO: extrapolate empty squares at some point by working out everywhere
+        // each pac can see and subtracting the above
     }
+    logFloor(floorMap);
     logPacs(pacs);
     // Write an action using console.log()
     // To debug: console.error('Debug messages...');
