@@ -1,5 +1,5 @@
-import {Pac} from "../Pac";
-import {FloorType} from "../FloorType";
+import {Pac} from "../game/Pac";
+import {FloorType} from "../game/FloorType";
 
 export function logComment(comment: string): void {
     console.error(`Comment: ${comment}`);
