@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "bundle": "node scripts/bundler.cjs",
     "combine": "rollup -c"
   },
   "devDependencies": {
