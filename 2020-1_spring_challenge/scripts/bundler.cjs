@@ -60,38 +60,55 @@ function removeImportsExports(sourceText) {
         true
     );
 
-    const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
-    const statements = [];
+    // Collect ranges to remove (in reverse order to maintain positions)
+    const rangesToRemove = [];
 
     sourceFile.statements.forEach(statement => {
-        // Skip import declarations entirely
+        // Remove import declarations entirely
         if (ts.isImportDeclaration(statement)) {
+            rangesToRemove.push({ start: statement.pos, end: statement.end });
             return;
         }
 
-        // Skip export declarations without a body (e.g., export { x, y })
+        // Remove export declarations without a body (e.g., export { x, y })
         if (ts.isExportDeclaration(statement)) {
+            rangesToRemove.push({ start: statement.pos, end: statement.end });
             return;
         }
 
-        // For statements with export keyword, remove the export modifier
-        if (statement.modifiers && statement.modifiers.some(m => m.kind === ts.SyntaxKind.ExportKeyword)) {
-            const modifiers = statement.modifiers.filter(m => m.kind !== ts.SyntaxKind.ExportKeyword);
-            const newStatement = ts.factory.createNodeArray(modifiers).length > 0
-                ? { ...statement, modifiers: ts.factory.createNodeArray(modifiers) }
-                : { ...statement, modifiers: undefined };
-            statements.push(newStatement);
-        } else {
-            statements.push(statement);
+        // For statements with export keyword, remove only the 'export' keyword
+        if (statement.modifiers) {
+            statement.modifiers.forEach(modifier => {
+                if (modifier.kind === ts.SyntaxKind.ExportKeyword) {
+                    // Find the actual position of the export keyword and remove it including trailing space
+                    const exportStart = modifier.pos;
+                    let exportEnd = modifier.end;
+
+                    // Check if there's a space after 'export' and include it in removal
+                    if (sourceText[exportEnd] === ' ') {
+                        exportEnd++;
+                    }
+
+                    rangesToRemove.push({ start: exportStart, end: exportEnd });
+                }
+            });
         }
     });
 
-    // Print the modified statements
-    const result = statements.map(stmt =>
-        printer.printNode(ts.EmitHint.Unspecified, stmt, sourceFile)
-    ).join('\n');
+    // Sort ranges in reverse order so we can remove from end to start
+    rangesToRemove.sort((a, b) => b.start - a.start);
 
-    return result;
+    // Build result by removing the ranges
+    let result = sourceText;
+    for (const range of rangesToRemove) {
+        result = result.substring(0, range.start) + result.substring(range.end);
+    }
+
+    // Clean up any resulting multiple blank lines (but preserve intentional spacing)
+    // Remove the line entirely if it only contained an import/export
+    result = result.replace(/\n\s*\n\s*\n/g, '\n\n'); // Max 2 consecutive newlines
+
+    return result.trim();
 }
 
 function bundle(config) {
