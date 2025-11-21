@@ -18,12 +18,16 @@ export class GameState {
     }
 
     public update() {
+        this.turn++;
+
         var inputs: string[] = readline().split(' ');
         this.myScore = parseInt(inputs[0]);
         this.opponentScore = parseInt(inputs[1]);
 
         this.myPacs = [];
         this.opponentPacs = [];
+
+        this.largePellets = []; // Reset large pellets each turn since they'll be repopulated as we read them in
 
         const visiblePacCount: number = parseInt(readline()); // all your pacs and enemy pacs in sight
 
@@ -75,8 +79,23 @@ export class GameState {
     private updateCell(x: number, y: number, floorType: FloorType){
         this.map.floorMap[y][x] = floorType;
 
-        // TODO: Update pellets lists based on above
+        // NOTE: This might end up being expensive. If performance becomes an issue look into alternatives
         // If floor type is empty check if we need to clear pellets
+        if (floorType === FloorType.Empty) {
+            this.smallPellets = this.smallPellets.filter(p => p.x !== x || p.y !== y);
+            this.largePellets = this.largePellets.filter(p => p.x !== x || p.y !== y);
+        }
         // else if floor type is a pellet check if we need to add to the pellets list
+        else if (floorType === FloorType.SmallPellet) {
+            const exists = this.smallPellets.some(p => p.x === x && p.y === y);
+            if (!exists) {
+                this.smallPellets.push({x, y});
+            }
+        } else if (floorType === FloorType.LargePellet) {
+            const exists = this.largePellets.some(p => p.x === x && p.y === y);
+            if (!exists) {
+                this.largePellets.push({x, y});
+            }
+        }
     }
 }

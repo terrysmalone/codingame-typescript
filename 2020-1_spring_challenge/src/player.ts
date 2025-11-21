@@ -1,4 +1,4 @@
-import {logComment, logPacs, logFloor} from "./utils/logger";
+import {logComment, logPacs, logFloor, logPellets} from "./utils/logger";
 import {GameState} from "./game/GameState";
 import {GameMap, initialiseGameMap} from "./game/GameMap";
 
@@ -12,6 +12,8 @@ while (true) {
     logFloor(gameState.map.floorMap);
     logPacs("My Pacs", gameState.myPacs);
     logPacs("Opponent Pacs", gameState.opponentPacs);
+    logPellets("Large Pellets", gameState.largePellets);
+    logPellets("Small Pellets", gameState.smallPellets);
 
     // Write an action using console.log()
     // To debug: console.error('Debug messages...');

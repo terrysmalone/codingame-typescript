@@ -1,5 +1,6 @@
 import {Pac} from "../game/Pac";
 import {FloorType} from "../game/FloorType";
+import {Position} from "./Position";
 
 export function logComment(comment: string): void {
     console.error(`Comment: ${comment}`);
@@ -53,5 +54,14 @@ export function logFloor(floorMap: FloorType[][]): void {
             row += tile;
         }
         console.error(row);
+    }
+}
+
+export function logPellets(text:string, pellets: Position[]): void {
+    console.error(text);
+    console.error("------------------------");
+
+    for (const pellet of pellets) {
+        console.error(`Pellet at: (${pellet.x}, ${pellet.y})`);
     }
 }
