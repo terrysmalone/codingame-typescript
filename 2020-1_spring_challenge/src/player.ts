@@ -10,7 +10,8 @@ while (true) {
     gameState.update();
 
     logFloor(gameState.map.floorMap);
-    logPacs(gameState.pacs);
+    logPacs("My Pacs", gameState.myPacs);
+    logPacs("Opponent Pacs", gameState.opponentPacs);
 
     // Write an action using console.log()
     // To debug: console.error('Debug messages...');

@@ -8,7 +8,8 @@ export class GameState {
     myScore: number = 0;
     opponentScore: number = 0;
     map: GameMap;
-    pacs: Pac[] = [];
+    myPacs: Pac[] = [];
+    opponentPacs: Pac[] = [];
     smallPellets: Position[] = [];
     largePellets: Position[] = [];
 
@@ -21,7 +22,9 @@ export class GameState {
         this.myScore = parseInt(inputs[0]);
         this.opponentScore = parseInt(inputs[1]);
 
-        this.pacs = [];
+        this.myPacs = [];
+        this.opponentPacs = [];
+
         const visiblePacCount: number = parseInt(readline()); // all your pacs and enemy pacs in sight
 
         for (let i = 0; i < visiblePacCount; i++) {
@@ -34,18 +37,20 @@ export class GameState {
             const speedTurnsLeft: number = parseInt(inputs[5]); // remaining turns before the speed effect fades
             const abilityCooldown: number = parseInt(inputs[6]); // turns until you can request a new ability for this pac
 
+            const pac: Pac = <Pac>{
+                id: pacId,
+                xPos: x,
+                yPos: y,
+                pacType: typeId,
+                speedTurnsLeft: speedTurnsLeft,
+                abilityCooldown: abilityCooldown,
+            }
             if (mine) {
-                this.pacs.push(<Pac>{
-                    id: pacId,
-                    xPos: x,
-                    yPos: y,
-                    pacType: typeId,
-                    speedTurnsLeft: speedTurnsLeft,
-                    abilityCooldown: abilityCooldown,
-                })
+                this.myPacs.push(pac)
+            } else {
+                this.opponentPacs.push(pac)
             }
 
-            // TODO: If it's a pac that's not mine log it's position
             this.updateCell(x, y, FloorType.Empty)
         }
         const visiblePelletCount: number = parseInt(readline()); // all pellets in sight

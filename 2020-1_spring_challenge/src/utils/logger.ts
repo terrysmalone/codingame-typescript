@@ -5,7 +5,10 @@ export function logComment(comment: string): void {
     console.error(`Comment: ${comment}`);
 }
 
-export function logPacs(pacs: Pac[]): void {
+export function logPacs(text:string, pacs: Pac[]): void {
+    console.error(text);
+    console.error("------------------------");
+
     for (const pac of pacs) {
         console.error(`Pac: ${pac.id}`);
         console.error(`Pos: (${pac.xPos}, ${pac.yPos})`);
