@@ -1,6 +1,7 @@
 import { GameState } from "../game/GameState";
-import { getEuclideanDistance } from "../utils/Distances";
 import { logComment } from "../utils/Logger";
+import { findShortestPath } from "./PathFinder";
+import { Position } from "../utils/Position";
 
 export function generateMoves(gameState: GameState) {
   var movesFound: boolean[] = new Array(gameState.myPacs.length).fill(false);
@@ -36,10 +37,12 @@ export function generateMoves(gameState: GameState) {
 
       logComment(`Checking pac ${gameState.myPacs[i].id}`);
 
-      const distance = getEuclideanDistance(
-        largePellet,
+      const [distance, path]: [number, Position[]] = findShortestPath(
         pac.position,
-        gameState.map.width,
+        largePellet,
+        gameState.map.wallMap,
+        gameState.opponentPacs,
+        true,
       );
       logComment(`Distance to pac ${pac.id} is ${distance}`);
       if (distance < nearestDistance) {
@@ -72,10 +75,12 @@ export function generateMoves(gameState: GameState) {
     nearestDistance = Number.MAX_SAFE_INTEGER;
 
     for (const smallPellet of gameState.smallPellets) {
-      const distance = getEuclideanDistance(
+      const [distance, path]: [number, Position[]] = findShortestPath(
         smallPellet,
         pac.position,
-        gameState.map.width,
+        gameState.map.wallMap,
+        gameState.opponentPacs,
+        true,
       );
       if (distance < nearestDistance) {
         nearestDistance = distance;
