@@ -1,7 +1,7 @@
 export enum FloorType {
-    Unknown,
-    Empty,
-    SmallPellet,
-    LargePellet,
-    Wall,
+  Unknown,
+  Empty,
+  SmallPellet,
+  LargePellet,
+  Wall,
 }
