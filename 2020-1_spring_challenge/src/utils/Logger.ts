@@ -12,7 +12,7 @@ export function logPacs(text: string, pacs: Pac[]): void {
 
   for (const pac of pacs) {
     console.error(`Pac: ${pac.id}`);
-    console.error(`Pos: (${pac.xPos}, ${pac.yPos})`);
+    console.error(`Pos: (${pac.position.x}, ${pac.position.y})`);
     console.error(`Type: ${pac.pacType}`);
     console.error(`Speed turns left: ${pac.speedTurnsLeft}`);
     console.error(`Ability cooldown: (${pac.abilityCooldown})`);

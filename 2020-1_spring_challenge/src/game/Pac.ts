@@ -1,3 +1,5 @@
+import { Position } from "../utils/Position";
+
 export enum PacType {
   ROCK = "ROCK",
   PAPER = "PAPER",
@@ -8,8 +10,7 @@ export enum PacType {
 export interface Pac {
   id: number;
 
-  xPos: number;
-  yPos: number;
+  position: Position;
 
   pacType: PacType;
 

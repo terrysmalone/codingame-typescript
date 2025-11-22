@@ -43,8 +43,7 @@ export class GameState {
 
       const pac: Pac = <Pac>{
         id: pacId,
-        xPos: x,
-        yPos: y,
+        position: { x, y },
         pacType: typeId,
         speedTurnsLeft: speedTurnsLeft,
         abilityCooldown: abilityCooldown,

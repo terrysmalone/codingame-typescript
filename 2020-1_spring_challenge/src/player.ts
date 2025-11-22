@@ -1,4 +1,4 @@
-import { logPacs, logFloor, logPellets } from "./utils/logger";
+import { logPacs, logFloor, logPellets } from "./utils/Logger";
 import { GameState } from "./game/GameState";
 import { GameMap, initialiseGameMap } from "./game/GameMap";
 import { generateMoves } from "./game/MoveCalculator";
@@ -21,5 +21,5 @@ while (true) {
 
   const moves: string[] = generateMoves(gameState);
 
-  console.log("MOVE 0 15 10"); // MOVE <pacId> <x> <y>
+  console.log(moves.join(" | ")); // MOVE <pacId> <x> <y>
 }
