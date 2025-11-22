@@ -16,4 +16,7 @@ export interface Pac {
 
   speedTurnsLeft: number;
   abilityCooldown: number;
+
+  currentPath: Position[];
+  moveFound: boolean;
 }

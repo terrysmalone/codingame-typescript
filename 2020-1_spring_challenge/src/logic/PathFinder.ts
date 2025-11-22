@@ -8,6 +8,8 @@ export function findShortestPath(
   wallMap: boolean[][],
   enemyPacs: Pac[] = [],
   avoidEnemyPacs: boolean = false,
+  myPacs: Pac[] = [],
+  avoidMyPacPaths: boolean = false,
 ): [number, Position[]] {
   var distance = 0;
   var path: Position[] = [];
@@ -75,6 +77,20 @@ export function findShortestPath(
         )
       ) {
         continue;
+      }
+
+      if (avoidMyPacPaths) {
+        if (
+          myPacs.some(
+            (mp) =>
+              mp.currentPath &&
+              mp.currentPath.some(
+                (pp) => pp.x === neighbor.x && pp.y === neighbor.y,
+              ),
+          )
+        ) {
+          continue;
+        }
       }
 
       const tentative_gScore = (gScore.get(posKey(current)) ?? Infinity) + 1;

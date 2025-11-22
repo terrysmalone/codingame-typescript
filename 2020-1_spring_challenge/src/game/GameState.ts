@@ -2,6 +2,7 @@ import { Pac, PacType } from "./Pac";
 import { Position } from "../utils/Position";
 import { GameMap } from "./GameMap";
 import { FloorType } from "./FloorType";
+import { logComment } from "../utils/Logger";
 
 export class GameState {
   turn: number = 0;
@@ -92,6 +93,7 @@ export class GameState {
     else if (floorType === FloorType.SmallPellet) {
       const exists = this.smallPellets.some((p) => p.x === x && p.y === y);
       if (!exists) {
+        logComment(`Adding small pellet at (${x}, ${y})`);
         this.smallPellets.push({ x, y });
       }
     } else if (floorType === FloorType.LargePellet) {
