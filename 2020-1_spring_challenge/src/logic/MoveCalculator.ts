@@ -32,9 +32,9 @@ export function generateMoves(gameState: GameState) {
       continue;
     }
 
-    logComment(
-      `Finding nearest small pellet for Pac ${pac.id} at (${pac.position.x}, ${pac.position.y})`,
-    );
+    // logComment(
+    //   `Finding nearest small pellet for Pac ${pac.id} at (${pac.position.x}, ${pac.position.y})`,
+    // );
     var nearestPellet: { x: number; y: number } | null = null;
     var nearestDistance = Number.MAX_SAFE_INTEGER;
     var nearestPath: Position[] = [];
@@ -48,12 +48,13 @@ export function generateMoves(gameState: GameState) {
         true,
         gameState.myPacs,
         true,
+        10,
       );
 
       if (distance > 0 && distance < nearestDistance) {
-        logComment(
-          `Nearest distance for ${pac.id} is now ${distance} to pellet at (${smallPellet.x}, ${smallPellet.y})`,
-        );
+        // logComment(
+        //   `Nearest distance for ${pac.id} is now ${distance} to pellet at (${smallPellet.x}, ${smallPellet.y})`,
+        // );
         nearestDistance = distance;
         nearestPellet = smallPellet;
         nearestPath = path;

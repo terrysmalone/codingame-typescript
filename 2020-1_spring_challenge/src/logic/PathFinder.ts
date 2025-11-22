@@ -10,6 +10,7 @@ export function findShortestPath(
   avoidEnemyPacs: boolean = false,
   myPacs: Pac[] = [],
   avoidMyPacPaths: boolean = false,
+  maxDistance: number = Infinity,
 ): [number, Position[]] {
   var distance = 0;
   var path: Position[] = [];
@@ -49,6 +50,14 @@ export function findShortestPath(
       }
       path.unshift(start);
       distance = gScore.get(posKey(end)) ?? 0;
+      break;
+    }
+
+    // Check max distance cutoff
+    if ((gScore.get(posKey(current)) ?? Infinity) >= maxDistance) {
+      // No valid path within maxDistance
+      path = [];
+      distance = 0;
       break;
     }
 
