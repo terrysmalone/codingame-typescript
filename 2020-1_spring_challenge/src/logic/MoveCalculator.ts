@@ -35,7 +35,7 @@ export function generateMoves(gameState: GameState) {
           (pac.pacType === "PAPER" && enemyPac.pacType === "ROCK");
 
         if (canDefeat) {
-          if (distance >= 1 && enemyPac.abilityCooldown === 0) {
+          if (distance === 1 && enemyPac.abilityCooldown === 0) {
             // Hold still to see if enemy pac switches or moves closer
             moves.push(`MOVE ${pac.id} ${pac.position.x} ${pac.position.y}`);
             pac.task = `Holding position to bait enemy pac ${enemyPac.id}`;
@@ -53,10 +53,21 @@ export function generateMoves(gameState: GameState) {
             pac.moveFound = true;
             break;
           }
+
+          // If they can switch, only attack if they're not close to me
+          if (enemyPac.abilityCooldown === 0 && distance > 1) {
+            moves.push(
+              `MOVE ${pac.id} ${enemyPac.position.x} ${enemyPac.position.y}`,
+            );
+            pac.task = `Attacking enemy pac ${enemyPac.id} at ${enemyPac.position.x} ${enemyPac.position.y}`;
+            pac.currentPath = path;
+            pac.moveFound = true;
+            break;
+          }
         }
 
         // I can't defeat them, can I switch
-        if (pac.abilityCooldown === 0) {
+        if (!canDefeat && pac.abilityCooldown === 0) {
           // change pac type to one that can defeat enemyPac
           let newType: string = "";
           if (enemyPac.pacType === "ROCK") newType = "PAPER";
@@ -86,17 +97,17 @@ export function generateMoves(gameState: GameState) {
   if (gameState.myPacs.every((pac) => pac.moveFound)) return moves;
 
   // for each pac if it can use ability then speed up
-  for (var i = 0; i < gameState.myPacs.length; i++) {
-    const pac = gameState.myPacs[i];
-    if (pac.moveFound) {
-      continue;
-    }
-    if (pac.abilityCooldown === 0) {
-      moves.push(`SPEED ${pac.id}`);
-      pac.task = "Doing speed boost";
-      pac.moveFound = true;
-    }
-  }
+  // for (var i = 0; i < gameState.myPacs.length; i++) {
+  //   const pac = gameState.myPacs[i];
+  //   if (pac.moveFound) {
+  //     continue;
+  //   }
+  //   if (pac.abilityCooldown === 0) {
+  //     moves.push(`SPEED ${pac.id}`);
+  //     pac.task = "Doing speed boost";
+  //     pac.moveFound = true;
+  //   }
+  // }
 
   // if all pacs have moveFound == true
   if (gameState.myPacs.every((pac) => pac.moveFound)) return moves;
