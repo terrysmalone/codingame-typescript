@@ -37,7 +37,6 @@ export class GameState {
     this.opponentScore = parseInt(inputs[1]);
 
     this.myPacs = [];
-    this.opponentPacs = [];
 
     this.largePellets = []; // Reset large pellets each turn since they'll be repopulated as we read them in
 
@@ -61,9 +60,27 @@ export class GameState {
         abilityCooldown: abilityCooldown,
       };
       if (mine) {
-        this.myPacs.push(pac);
+        if (typeId != PacType.DEAD) {
+          this.myPacs.push(pac);
+        }
+        // If first turn add mirrored opponent pacs
+        if (this.turn === 1) {
+          const opponentPac: Pac = <Pac>{
+            id: pacId,
+            position: { x: this.map.width - 1 - x, y: y },
+            pacType: typeId,
+            speedTurnsLeft: speedTurnsLeft,
+            abilityCooldown: abilityCooldown,
+          };
+
+          this.opponentPacs.push(opponentPac);
+        }
       } else {
-        this.opponentPacs.push(pac);
+        this.opponentPacs = this.opponentPacs.filter((p) => p.id !== pacId);
+
+        if (typeId != PacType.DEAD) {
+          this.opponentPacs.push(pac);
+        }
       }
 
       this.updateCell(x, y, FloorType.Empty);
@@ -87,11 +104,9 @@ export class GameState {
       visiblePellets.push({ x, y });
     }
 
-    // TODO: extrapolate empty squares at some point by working out everywhere
     for (let pac of this.myPacs) {
       var visiblePositions: Position[] = [];
 
-      // TODO: Can they see through wrapped walls?
       // Pacs can see in all 4 directions until they hit a wall
       // Up
       for (let ty = pac.position.y - 1; ty >= 0; ty--) {

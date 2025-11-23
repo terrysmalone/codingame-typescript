@@ -6,6 +6,8 @@ import { logFloor, logPacs, logPellets } from "./utils/Logger";
 const gameMap: GameMap = initialiseGameMap();
 const gameState = new GameState(gameMap);
 
+logPacs("Initial opponent Pacs", gameState.opponentPacs);
+
 // game loop
 while (true) {
   gameState.update();
@@ -21,6 +23,7 @@ while (true) {
   const moves: string[] = generateMoves(gameState);
 
   logPacs("My Pacs", gameState.myPacs);
+  logPacs("Opponent Pacs", gameState.opponentPacs);
 
   console.log(moves.join(" | ")); // MOVE <pacId> <x> <y>
 }

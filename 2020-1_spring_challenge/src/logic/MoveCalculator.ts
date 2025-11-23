@@ -9,7 +9,7 @@ export function generateMoves(gameState: GameState) {
   var moves: string[] = [];
 
   // for each pac if an enemy pac is within range and can be defeated then attack
-  const attackRange: number = 4;
+  const attackRange: number = 3;
 
   for (var i = 0; i < gameState.myPacs.length; i++) {
     const pac = gameState.myPacs[i];
@@ -96,6 +96,8 @@ export function generateMoves(gameState: GameState) {
   // if all moves are found return them
   if (gameState.myPacs.every((pac) => pac.moveFound)) return moves;
 
+  // TODO: Work out when to use a boost and when not to
+  // Maybe based on distance to closest enemy?
   // for each pac if it can use ability then speed up
   // for (var i = 0; i < gameState.myPacs.length; i++) {
   //   const pac = gameState.myPacs[i];
