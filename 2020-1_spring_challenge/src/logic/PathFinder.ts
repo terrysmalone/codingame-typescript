@@ -1,6 +1,7 @@
 import { Position } from "../utils/Position";
 import { getEuclideanDistance } from "../utils/Distances";
 import { Pac } from "../game/Pac";
+import { logComment } from "../utils/Logger";
 
 export function findShortestPath(
   start: Position,

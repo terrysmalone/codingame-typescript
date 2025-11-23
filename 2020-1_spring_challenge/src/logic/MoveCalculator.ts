@@ -1,14 +1,77 @@
 import { GameState } from "../game/GameState";
-import { logComment } from "../utils/Logger";
 import { findShortestPath } from "./PathFinder";
 import { Position } from "../utils/Position";
 
 export function generateMoves(gameState: GameState) {
   var moves: string[] = [];
 
+  // for each pac if an enemy pac is within range and can be defeated then attack
+  for (var i = 0; i < gameState.myPacs.length; i++) {
+    const pac = gameState.myPacs[i];
+
+    if (pac.moveFound) {
+      continue;
+    }
+
+    for (var j = 0; j < gameState.opponentPacs.length; j++) {
+      const enemyPac = gameState.opponentPacs[j];
+
+      const [distance, path]: [number, Position[]] = findShortestPath(
+        pac.position,
+        enemyPac.position,
+        gameState.map.wallMap,
+      );
+
+      if (distance > 0 && distance <= 4) {
+        // determine if pac can defeat enemyPac
+        const canDefeat =
+          (pac.pacType === "ROCK" && enemyPac.pacType === "SCISSORS") ||
+          (pac.pacType === "SCISSORS" && enemyPac.pacType === "PAPER") ||
+          (pac.pacType === "PAPER" && enemyPac.pacType === "ROCK");
+
+        if (canDefeat) {
+          if (distance <= 2 && enemyPac.abilityCooldown === 0) {
+            // Hold still to see if enemy pac switches or moves closer
+            moves.push(`MOVE ${pac.id} ${pac.position.x} ${pac.position.y}`);
+            pac.task = `Holding position to bait enemy pac ${enemyPac.id}`;
+            pac.moveFound = true;
+            break; // exit loop after assigning hold move
+          }
+
+          moves.push(
+            `MOVE ${pac.id} ${enemyPac.position.x} ${enemyPac.position.y}`,
+          );
+          pac.task = `Attacking enemy pac ${enemyPac.id} at ${enemyPac.position.x} ${enemyPac.position.y}`;
+          pac.currentPath = path;
+          pac.moveFound = true;
+          break; // exit loop after assigning attack move
+        } else {
+          if (pac.abilityCooldown === 0) {
+            // change pac type to one that can defeat enemyPac
+            let newType: string = "";
+            if (enemyPac.pacType === "ROCK") newType = "PAPER";
+            if (enemyPac.pacType === "PAPER") newType = "SCISSORS";
+            if (enemyPac.pacType === "SCISSORS") newType = "ROCK";
+
+            moves.push(`SWITCH ${pac.id} ${newType}`);
+            pac.task = `Switching type to ${newType} to defeat enemy pac ${enemyPac.id}`;
+            pac.moveFound = true;
+            break; // exit loop after assigning switch move
+          }
+        }
+      }
+    }
+  }
+
+  // if all moves are found return them
+  if (gameState.myPacs.every((pac) => pac.moveFound)) return moves;
+
   // for each pac if it can use ability then speed up
   for (var i = 0; i < gameState.myPacs.length; i++) {
     const pac = gameState.myPacs[i];
+    if (pac.moveFound) {
+      continue;
+    }
     if (pac.abilityCooldown === 0) {
       moves.push(`SPEED ${pac.id}`);
       pac.task = "Doing speed boost";
