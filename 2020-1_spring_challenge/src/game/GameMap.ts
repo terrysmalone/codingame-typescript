@@ -27,7 +27,7 @@ export function initialiseGameMap(): GameMap {
     for (let x = 0; x < tiles.length; x++) {
       if (tiles[x] == " ") {
         wallMap[y][x] = false;
-        floorMap[y][x] = FloorType.Unknown;
+        floorMap[y][x] = FloorType.SmallPellet;
       } else {
         wallMap[y][x] = true;
         floorMap[y][x] = FloorType.Wall;

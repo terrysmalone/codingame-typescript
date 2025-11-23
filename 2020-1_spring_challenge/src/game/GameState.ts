@@ -16,6 +16,17 @@ export class GameState {
 
   constructor(map: GameMap) {
     this.map = map;
+
+    // Initialise pellets
+    for (let y = 0; y < map.height; y++) {
+      for (let x = 0; x < map.width; x++) {
+        const floorType: FloorType = map.floorMap[y][x];
+
+        if (floorType == FloorType.SmallPellet) {
+          this.smallPellets.push({ x: x, y: y });
+        }
+      }
+    }
   }
 
   public update() {
@@ -135,6 +146,11 @@ export class GameState {
         this.smallPellets.push({ x, y });
       }
     } else if (floorType === FloorType.LargePellet) {
+      // Remove any small pellets we think are here
+      this.smallPellets = this.smallPellets.filter(
+        (p) => p.x !== x || p.y !== y,
+      );
+
       const exists = this.largePellets.some((p) => p.x === x && p.y === y);
       if (!exists) {
         this.largePellets.push({ x, y });
