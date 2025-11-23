@@ -16,6 +16,7 @@ export function logPacs(text: string, pacs: Pac[]): void {
     console.error(`Type: ${pac.pacType}`);
     console.error(`Speed turns left: ${pac.speedTurnsLeft}`);
     console.error(`Ability cooldown: (${pac.abilityCooldown})`);
+    console.error(`Task: ${pac.task}`);
     if (pac.currentPath && pac.currentPath.length !== 0) {
       console.error(
         `Current Path: ${pac.currentPath.map((pos) => `(${pos.x}, ${pos.y})`).join(" -> ")}`,

@@ -11,6 +11,7 @@ export function generateMoves(gameState: GameState) {
     const pac = gameState.myPacs[i];
     if (pac.abilityCooldown === 0) {
       moves.push(`SPEED ${pac.id}`);
+      pac.task = "Doing speed boost";
       pac.moveFound = true;
     }
   }
@@ -63,6 +64,7 @@ export function generateMoves(gameState: GameState) {
 
     if (nearestPellet) {
       moves.push(`MOVE ${pac.id} ${nearestPellet.x} ${nearestPellet.y}`);
+      pac.task = `Going for small pellet at ${nearestPellet.x} ${nearestPellet.y}`;
       pac.currentPath = nearestPath;
       pac.moveFound = true;
     }
@@ -86,6 +88,7 @@ export function generateMoves(gameState: GameState) {
       if (!gameState.map.wallMap[randomY][randomX]) {
         moves.push(`MOVE ${pac.id} ${randomX} ${randomY}`);
         pac.currentPath = [{ x: randomX, y: randomY }];
+        pac.task = `Making random move to ${randomX} ${randomY}`;
         invalidMove = false;
       }
     }
@@ -94,18 +97,25 @@ export function generateMoves(gameState: GameState) {
   return moves;
 }
 
+type PelletPairings = {
+  pelletIndex: number;
+  pacIndex: number;
+  distance: number;
+  path: Position[];
+};
+
 function assignToPellets(
   gameState: GameState,
   pellets: Position[],
   moves: string[],
 ) {
-  for (const pellet of pellets) {
-    var nearestPacIndex: number = -1;
-    var nearestDistance: number = Number.MAX_SAFE_INTEGER;
-    var nearestPath: Position[] = [];
+  var pairings: PelletPairings[] = [];
+  // for each pellet get the distance to each pac that hasn't moved yet and add it to pairings
+  for (let i = 0; i < pellets.length; i++) {
+    const pellet = pellets[i];
 
-    for (let i = 0; i < gameState.myPacs.length; i++) {
-      const pac = gameState.myPacs[i];
+    for (let j = 0; j < gameState.myPacs.length; j++) {
+      const pac = gameState.myPacs[j];
       if (pac.moveFound) {
         continue;
       }
@@ -120,18 +130,36 @@ function assignToPellets(
         true,
       );
 
-      if (distance > 0 && distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestPacIndex = i;
-        nearestPath = path;
-      }
+      pairings.push({
+        pelletIndex: i,
+        pacIndex: j,
+        distance: distance,
+        path: path,
+      });
     }
+  }
 
-    if (nearestPacIndex !== -1) {
-      const pac = gameState.myPacs[nearestPacIndex];
-      moves.push(`MOVE ${pac.id} ${pellet.x} ${pellet.y}`);
+  pairings.sort((a, b) => a.distance - b.distance);
+
+  // assign pellets to pacs based on shortest distance
+  const assignedPellets = new Set<number>();
+  const assignedPacs = new Set<number>();
+
+  for (const pairing of pairings) {
+    if (
+      !assignedPellets.has(pairing.pelletIndex) &&
+      !assignedPacs.has(pairing.pacIndex)
+    ) {
+      const pac = gameState.myPacs[pairing.pacIndex];
+      moves.push(
+        `MOVE ${pac.id} ${pellets[pairing.pelletIndex].x} ${pellets[pairing.pelletIndex].y}`,
+      );
+      pac.task = `Going for large pellet at ${pellets[pairing.pelletIndex].x} ${pellets[pairing.pelletIndex].y}`;
       pac.moveFound = true;
-      pac.currentPath = nearestPath;
+      pac.currentPath = pairing.path;
+
+      assignedPellets.add(pairing.pelletIndex);
+      assignedPacs.add(pairing.pacIndex);
     }
   }
 }

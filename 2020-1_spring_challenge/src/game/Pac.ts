@@ -19,4 +19,6 @@ export interface Pac {
 
   currentPath: Position[];
   moveFound: boolean;
+
+  task: string;
 }

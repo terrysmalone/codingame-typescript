@@ -57,7 +57,9 @@ export class GameState {
 
       this.updateCell(x, y, FloorType.Empty);
     }
+
     const visiblePelletCount: number = parseInt(readline()); // all pellets in sight
+    var visiblePellets: Position[] = [];
     for (let i = 0; i < visiblePelletCount; i++) {
       var inputs: string[] = readline().split(" ");
       const x: number = parseInt(inputs[0]);
@@ -71,8 +73,45 @@ export class GameState {
         this.updateCell(x, y, FloorType.LargePellet);
       }
 
-      // TODO: extrapolate empty squares at some point by working out everywhere
-      // each pac can see and subtracting the above pellets
+      visiblePellets.push({ x, y });
+    }
+
+    // TODO: extrapolate empty squares at some point by working out everywhere
+    for (let pac of this.myPacs) {
+      var visiblePositions: Position[] = [];
+
+      // TODO: Can they see through wrapped walls?
+      // Pacs can see in all 4 directions until they hit a wall
+      // Up
+      for (let ty = pac.position.y - 1; ty >= 0; ty--) {
+        if (this.map.wallMap[ty][pac.position.x]) break;
+        visiblePositions.push({ x: pac.position.x, y: ty });
+      }
+      // Down
+      for (let ty = pac.position.y + 1; ty < this.map.height; ty++) {
+        if (this.map.wallMap[ty][pac.position.x]) break;
+        visiblePositions.push({ x: pac.position.x, y: ty });
+      }
+      // Left
+      for (let tx = pac.position.x - 1; tx >= 0; tx--) {
+        if (this.map.wallMap[pac.position.y][tx]) break;
+        visiblePositions.push({ x: tx, y: pac.position.y });
+      }
+      // Right
+      for (let tx = pac.position.x + 1; tx < this.map.width; tx++) {
+        if (this.map.wallMap[pac.position.y][tx]) break;
+        visiblePositions.push({ x: tx, y: pac.position.y });
+      }
+
+      // If any visible position does not have a matching pellet, it must be empty
+      for (let pos of visiblePositions) {
+        const found = visiblePellets.some(
+          (p) => p.x === pos.x && p.y === pos.y,
+        );
+        if (!found) {
+          this.updateCell(pos.x, pos.y, FloorType.Empty);
+        }
+      }
     }
   }
 
@@ -93,7 +132,6 @@ export class GameState {
     else if (floorType === FloorType.SmallPellet) {
       const exists = this.smallPellets.some((p) => p.x === x && p.y === y);
       if (!exists) {
-        logComment(`Adding small pellet at (${x}, ${y})`);
         this.smallPellets.push({ x, y });
       }
     } else if (floorType === FloorType.LargePellet) {
