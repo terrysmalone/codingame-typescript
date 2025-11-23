@@ -122,6 +122,7 @@ export function generateMoves(gameState: GameState) {
     var nearestDistance = Number.MAX_SAFE_INTEGER;
     var nearestPath: Position[] = [];
 
+    // TODO: Order by euclidean distance to myPac
     for (const smallPellet of gameState.smallPellets) {
       const [distance, path]: [number, Position[]] = findShortestPath(
         pac.position,
@@ -131,16 +132,18 @@ export function generateMoves(gameState: GameState) {
         true,
         gameState.myPacs,
         true,
-        10,
+        nearestDistance,
       );
 
       if (distance > 0 && distance < nearestDistance) {
-        // logComment(
-        //   `Nearest distance for ${pac.id} is now ${distance} to pellet at (${smallPellet.x}, ${smallPellet.y})`,
-        // );
         nearestDistance = distance;
         nearestPellet = smallPellet;
         nearestPath = path;
+      }
+
+      // Cut out early if we're next to a pellet
+      if (nearestDistance == 1) {
+        break;
       }
     }
 
