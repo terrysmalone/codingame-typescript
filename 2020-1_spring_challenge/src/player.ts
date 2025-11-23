@@ -20,7 +20,7 @@ while (true) {
 
   const moves: string[] = generateMoves(gameState);
 
-  // logPacs("My Pacs", gameState.myPacs);
+  logPacs("My Pacs", gameState.myPacs);
 
   console.log(moves.join(" | ")); // MOVE <pacId> <x> <y>
 }

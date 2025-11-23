@@ -1,11 +1,16 @@
 import { GameState } from "../game/GameState";
 import { findShortestPath } from "./PathFinder";
 import { Position } from "../utils/Position";
+import { getDistanceFromOpponent } from "../utils/Distances";
+import { Pac } from "../game/Pac";
+import { logComment } from "../utils/Logger";
 
 export function generateMoves(gameState: GameState) {
   var moves: string[] = [];
 
   // for each pac if an enemy pac is within range and can be defeated then attack
+  const attackRange: number = 4;
+
   for (var i = 0; i < gameState.myPacs.length; i++) {
     const pac = gameState.myPacs[i];
 
@@ -22,7 +27,7 @@ export function generateMoves(gameState: GameState) {
         gameState.map.wallMap,
       );
 
-      if (distance > 0 && distance <= 4) {
+      if (distance > 0 && distance <= attackRange) {
         // determine if pac can defeat enemyPac
         const canDefeat =
           (pac.pacType === "ROCK" && enemyPac.pacType === "SCISSORS") ||
@@ -30,35 +35,54 @@ export function generateMoves(gameState: GameState) {
           (pac.pacType === "PAPER" && enemyPac.pacType === "ROCK");
 
         if (canDefeat) {
-          if (distance <= 2 && enemyPac.abilityCooldown === 0) {
+          logComment(`I can defeat Pac`);
+          if (distance >= 1 && enemyPac.abilityCooldown === 0) {
             // Hold still to see if enemy pac switches or moves closer
             moves.push(`MOVE ${pac.id} ${pac.position.x} ${pac.position.y}`);
             pac.task = `Holding position to bait enemy pac ${enemyPac.id}`;
             pac.moveFound = true;
-            break; // exit loop after assigning hold move
+            break;
           }
 
-          moves.push(
-            `MOVE ${pac.id} ${enemyPac.position.x} ${enemyPac.position.y}`,
-          );
-          pac.task = `Attacking enemy pac ${enemyPac.id} at ${enemyPac.position.x} ${enemyPac.position.y}`;
-          pac.currentPath = path;
-          pac.moveFound = true;
-          break; // exit loop after assigning attack move
-        } else {
-          if (pac.abilityCooldown === 0) {
-            // change pac type to one that can defeat enemyPac
-            let newType: string = "";
-            if (enemyPac.pacType === "ROCK") newType = "PAPER";
-            if (enemyPac.pacType === "PAPER") newType = "SCISSORS";
-            if (enemyPac.pacType === "SCISSORS") newType = "ROCK";
-
-            moves.push(`SWITCH ${pac.id} ${newType}`);
-            pac.task = `Switching type to ${newType} to defeat enemy pac ${enemyPac.id}`;
+          // If they can't switch then attack
+          if (enemyPac.abilityCooldown !== 0) {
+            moves.push(
+              `MOVE ${pac.id} ${enemyPac.position.x} ${enemyPac.position.y}`,
+            );
+            pac.task = `Attacking enemy pac ${enemyPac.id} at ${enemyPac.position.x} ${enemyPac.position.y}`;
+            pac.currentPath = path;
             pac.moveFound = true;
-            break; // exit loop after assigning switch move
+            break;
           }
         }
+
+        logComment(`I can't defeat Pac`);
+
+        // I can't defeat them, can I switch
+        if (pac.abilityCooldown === 0) {
+          logComment(`Switching`);
+          // change pac type to one that can defeat enemyPac
+          let newType: string = "";
+          if (enemyPac.pacType === "ROCK") newType = "PAPER";
+          if (enemyPac.pacType === "PAPER") newType = "SCISSORS";
+          if (enemyPac.pacType === "SCISSORS") newType = "ROCK";
+
+          moves.push(`SWITCH ${pac.id} ${newType}`);
+          pac.task = `Switching type to ${newType} to defeat enemy pac ${enemyPac.id}`;
+          pac.moveFound = true;
+          break;
+        }
+
+        logComment("Finding flee move");
+        // I can't defeat them or switch, just run
+        var moveFound: boolean = getFleeMove(
+          pac,
+          moves,
+          enemyPac.position,
+          distance,
+          gameState.map.wallMap,
+        );
+        if (moveFound) break;
       }
     }
   }
@@ -225,4 +249,96 @@ function assignToPellets(
       assignedPacs.add(pairing.pacIndex);
     }
   }
+}
+
+function getFleeMove(
+  pac: Pac,
+  moves: string[],
+  enemyPos: Position,
+  distance: number,
+  wallMap: boolean[][],
+): boolean {
+  // check up
+  if (
+    tryMove(
+      pac,
+      { x: pac.position.x, y: pac.position.y - 1 },
+      enemyPos,
+      wallMap,
+      distance,
+      moves,
+    )
+  ) {
+    logComment("Fleeing up");
+    return true;
+  }
+
+  // check down
+  if (
+    tryMove(
+      pac,
+      { x: pac.position.x, y: pac.position.y + 1 },
+      enemyPos,
+      wallMap,
+      distance,
+      moves,
+    )
+  ) {
+    return true;
+  }
+
+  // check left
+  if (
+    tryMove(
+      pac,
+      { x: pac.position.x - 1, y: pac.position.y },
+      enemyPos,
+      wallMap,
+      distance,
+      moves,
+    )
+  ) {
+    return true;
+  }
+
+  // check right
+  if (
+    tryMove(
+      pac,
+      { x: pac.position.x + 1, y: pac.position.y },
+      enemyPos,
+      wallMap,
+      distance,
+      moves,
+    )
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function tryMove(
+  pac: Pac,
+  movePos: Position,
+  enemyPos: Position,
+  wallMap: boolean[][],
+  distance: number,
+  moves: string[],
+): boolean {
+  var moveDistance = getDistanceFromOpponent(movePos, enemyPos, wallMap);
+
+  logComment(`movePos: ${movePos.x}, ${movePos.y}`);
+  logComment(`enemyPos: ${enemyPos.x}, ${enemyPos.y}`);
+  logComment(`distance: ${distance}`);
+  logComment(`moveDistance: ${moveDistance}`);
+  if (moveDistance > distance) {
+    moves.push(`MOVE ${pac.id} ${movePos.x} ${movePos.y}`);
+    pac.task = `Running away from enemy at ${enemyPos.x} ${enemyPos.y}`;
+    pac.currentPath = [movePos];
+    pac.moveFound = true;
+    return true;
+  }
+
+  return false;
 }
