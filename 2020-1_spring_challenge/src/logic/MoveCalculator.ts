@@ -35,7 +35,6 @@ export function generateMoves(gameState: GameState) {
           (pac.pacType === "PAPER" && enemyPac.pacType === "ROCK");
 
         if (canDefeat) {
-          logComment(`I can defeat Pac`);
           if (distance >= 1 && enemyPac.abilityCooldown === 0) {
             // Hold still to see if enemy pac switches or moves closer
             moves.push(`MOVE ${pac.id} ${pac.position.x} ${pac.position.y}`);
@@ -56,11 +55,8 @@ export function generateMoves(gameState: GameState) {
           }
         }
 
-        logComment(`I can't defeat Pac`);
-
         // I can't defeat them, can I switch
         if (pac.abilityCooldown === 0) {
-          logComment(`Switching`);
           // change pac type to one that can defeat enemyPac
           let newType: string = "";
           if (enemyPac.pacType === "ROCK") newType = "PAPER";
@@ -73,7 +69,6 @@ export function generateMoves(gameState: GameState) {
           break;
         }
 
-        logComment("Finding flee move");
         // I can't defeat them or switch, just run
         var moveFound: boolean = getFleeMove(
           pac,
@@ -269,7 +264,6 @@ function getFleeMove(
       moves,
     )
   ) {
-    logComment("Fleeing up");
     return true;
   }
 
@@ -328,10 +322,6 @@ function tryMove(
 ): boolean {
   var moveDistance = getDistanceFromOpponent(movePos, enemyPos, wallMap);
 
-  logComment(`movePos: ${movePos.x}, ${movePos.y}`);
-  logComment(`enemyPos: ${enemyPos.x}, ${enemyPos.y}`);
-  logComment(`distance: ${distance}`);
-  logComment(`moveDistance: ${moveDistance}`);
   if (moveDistance > distance) {
     moves.push(`MOVE ${pac.id} ${movePos.x} ${movePos.y}`);
     pac.task = `Running away from enemy at ${enemyPos.x} ${enemyPos.y}`;

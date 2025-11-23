@@ -23,8 +23,6 @@ export function getDistanceFromOpponent(
 ): number {
   var distance = -1;
 
-  logComment(`wallMap.length: ${wallMap.length}`);
-  logComment(`wallMap[0].length: ${wallMap[0].length}`);
   // Check bounds
   if (
     myPos.x < 0 ||
